@@ -1,39 +1,3 @@
-apiVersion: apps/v1
-kind: Deployment
-metadata:
-  name: nginx-proxy-manager
-  labels:
-    app: npm
-spec:
-  replicas: 1
-  selector:
-    matchLabels:
-      app: npm
-  template:
-    metadata:
-      labels:
-        app: npm
-    spec:
-      containers:
-        - name: npm
-          image: jc21/nginx-proxy-manager:latest
-          ports:
-            - containerPort: 81 # UI
-            - containerPort: 80 # HTTP Proxy
-            - containerPort: 443 # HTTPS Proxy
-          volumeMounts:
-            - name: data
-              mountPath: /data
-            - name: letsencrypt
-              mountPath: /etc/letsencrypt
-      volumes:
-        - name: data
-          persistentVolumeClaim:
-            claimName: npm-data
-        - name: letsencrypt
-          persistentVolumeClaim:
-            claimName: npm-letsencrypt
----
 apiVersion: v1
 kind: Service
 metadata:
@@ -45,10 +9,13 @@ spec:
     - protocol: TCP
       port: 80
       targetPort: 80
+      name: http
     - protocol: TCP
       port: 81
       targetPort: 81
+      name: admin-ui
     - protocol: TCP
       port: 443
       targetPort: 443
+      name: https
   type: ClusterIP
